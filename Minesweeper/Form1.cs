@@ -13,10 +13,11 @@ namespace Minesweeper
     public partial class Form1 : Form
     {
         public Dictionary<int, tile> Grid = new Dictionary<int, tile>();
-        //public Dictionary<int, byte> GridNums = new Dictionary<int, byte>();
-        public Dictionary<Point, tile> GridPoint = new Dictionary<Point, tile>();
         public Dictionary<int, Button> GridButtons = new Dictionary<int, Button>();
+        public Dictionary<int, PictureBox> GridNums = new Dictionary<int, PictureBox>();
         public Dictionary<int, bool> buttonStates = new Dictionary<int, bool>();
+        public Dictionary<Point, tile> GridPoint = new Dictionary<Point, tile>();
+        public List<Point> checkedPoints = new List<Point>();
         public int mineCountNum = 0;
         public Form1()
         {
@@ -28,6 +29,11 @@ namespace Minesweeper
             {
                 for (int j = 0; j < 23; j++)
                 {
+                    var picbox = new System.Windows.Forms.PictureBox();
+                    picbox.Name = counter.ToString();
+                    picbox.Hide();
+                    picbox.Location = new System.Drawing.Point(xx, yy);
+                    picbox.Size = new System.Drawing.Size(16, 16);
                     Grid.Add(counter, new tile(xx, yy, counter, 'n'));
                     var button = new System.Windows.Forms.Button();
                     button.Name = counter.ToString();
@@ -38,14 +44,16 @@ namespace Minesweeper
                     button.Text = counter.ToString();
                     button.UseVisualStyleBackColor = true;
                     button.MouseDown += BackButton_MouseDown;
-                    button.MouseUp += BackButton_MouseUp;
+                    button.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.857143F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+                    button.Margin = new System.Windows.Forms.Padding(0);
                     button.Click += button_Click;
                     button.Paint += BackButton_Paint;
-                    button.ForeColor = System.Drawing.Color.White;
+                    button.ForeColor = System.Drawing.Color.Black;
                     GridPoint.Add(button.Location, new tile(xx, yy, counter, 'n'));
                     buttonStates.Add(counter, false);
                     GridButtons.Add(counter, button);
-                    //MessageBox.Show(button.Location.ToString());
+                    this.Controls.Add(picbox);
+                    GridNums.Add(counter, picbox);
                     this.Controls.Add(button);
                     xx += 16;
                     counter++;
@@ -53,10 +61,10 @@ namespace Minesweeper
                 xx = 24;
                 yy += 16;
             }
+
             var randomList = new List<int>();
             for (int i = 0; i < mineCountNum; i++)
             {
-
                 var rad = random.Next(0, 528);
                 if (!randomList.Contains(rad)) randomList.Add(rad);
                 else
@@ -95,14 +103,27 @@ namespace Minesweeper
                 try { if (GridPoint[new Point(xx, yy + 16)].type == 'm') total++; } catch { }
                 try { if (GridPoint[new Point(xx + 16, yy + 16)].type == 'm') total++; } catch { }
                 Grid[i].disNum = total;
-                //GridButtons[i].Text = GridButtons[i].Text + ' ' + total.ToString();
             }
+            counter = 0;
+            foreach (var picbox in GridNums)
+            {
+                switch (Grid[counter].disNum)
+                {
+                    case 1: picbox.Value.Image = global::Minesweeper.Properties.Resources._1; break;
+                    case 2: picbox.Value.Image = global::Minesweeper.Properties.Resources._2; break;
+                    case 3: picbox.Value.Image = global::Minesweeper.Properties.Resources._3; break;
+                    case 4: picbox.Value.Image = global::Minesweeper.Properties.Resources._4; break;
+                    case 5: picbox.Value.Image = global::Minesweeper.Properties.Resources._5; break;
+                    default: if (Grid[counter].type != 'm') { picbox.Value.Image = null; Grid[counter].changeType('b'); }  break;
+                }
+                counter++;
+            }
+
 
         }
         private void BackButton_Paint(object sender, PaintEventArgs e)
         {
             var blnButtonDown = buttonStates[Int32.Parse(sender.ToString().Split(':')[1])];
-            if (Grid[Int32.Parse(sender.ToString().Split(':')[1])].type == 'm')
                 if (blnButtonDown == false)
                 {
                     ControlPaint.DrawBorder(e.Graphics, (sender as System.Windows.Forms.Button).ClientRectangle,
@@ -131,21 +152,43 @@ namespace Minesweeper
         private void button_Click(object sender, EventArgs e)
         {
             var buttonNum = Int32.Parse(sender.ToString().Split(':')[1]);
-            MessageBox.Show(Grid[buttonNum].x.ToString() + ' ' + Grid[buttonNum].y.ToString() + ' ' + buttonNum + ' ' + sender.ToString() + ' ' + Grid[buttonNum].disNum);
+            MessageBox.Show(Grid[buttonNum].x.ToString() + "<-X Y->" + Grid[buttonNum].y.ToString() + " Num->" + buttonNum + " SenderToString->" + sender.ToString() + " Mines->" + Grid[buttonNum].disNum);
             if (Grid[buttonNum].type == 'm') MessageBox.Show("You hit a mine");
             else
             {
-                //int xx = Grid[buttonNum].x, yy = Grid[buttonNum].y, total = 0;
-                //try { if (GridPoint[new Point(xx - 16, yy - 16)].type == 'm') total++; } catch { }
-                //try { if (GridPoint[new Point(xx, yy - 16)].type == 'm') total++; } catch { }
-                //try { if (GridPoint[new Point(xx + 16, yy - 16)].type == 'm') total++;} catch { }
-                //try { if (GridPoint[new Point(xx - 16, yy)].type == 'm') total++;} catch { }
-                //try { if (GridPoint[new Point(xx + 16, yy)].type == 'm') total++;  } catch { }
-                //try { if (GridPoint[new Point(xx - 16, yy + 16)].type == 'm') total++; } catch { }
-                //try { if (GridPoint[new Point(xx, yy + 16)].type == 'm') total++; } catch { }
-                //try { if (GridPoint[new Point(xx + 16, yy + 16)].type == 'm') total++; } catch { }
-
+                if (GridNums[buttonNum].Image == null)
+                {
+                    revealAroundBlank(buttonNum);
+                }
+                GridNums[buttonNum].Show();
+                GridNums[buttonNum].BringToFront();
+                GridButtons[buttonNum].SendToBack();
             }
+        }
+        private void revealAroundBlank(int number)
+        {
+            var xx = Grid[number].x;
+            var yy = Grid[number].y;
+            try { if (Grid[GridPoint[new Point(xx - 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy - 16))) { checkedPoints.Add(new Point(xx-16, yy-16)); revealAroundBlank(xx - 16, yy - 16);   } else { GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy - 16)].count].SendToBack(); var tf = Grid[GridPoint[new Point(xx - 16, yy - 16)].count].type; MessageBox.Show("False TopRight -> " + tf); } } catch (Exception e){ MessageBox.Show(e.ToString() + " <-Error"); }
+            try { if (Grid[GridPoint[new Point(xx, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy - 16))) { checkedPoints.Add(new Point(xx, yy-16)); revealAroundBlank(xx, yy - 16);  } else { GridNums[GridPoint[new Point(xx, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx, yy - 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx + 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy - 16))) { checkedPoints.Add(new Point(xx+16, yy-16)); revealAroundBlank(xx + 16, yy - 16);  } else { GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy - 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx - 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy))) { checkedPoints.Add(new Point(xx-16, yy)); revealAroundBlank(xx - 16, yy);  } else { GridNums[GridPoint[new Point(xx - 16, yy)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx + 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy))) { checkedPoints.Add(new Point(xx+16, yy)); revealAroundBlank(xx - 16, yy);  } else { GridNums[GridPoint[new Point(xx + 16, yy)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx - 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy + 16))) { checkedPoints.Add(new Point(xx-16, yy+16)); revealAroundBlank(xx - 16, yy + 16); } else { GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy + 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy + 16))) { checkedPoints.Add(new Point(xx, yy+16)); revealAroundBlank(xx, yy + 16);  } else { GridNums[GridPoint[new Point(xx, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx, yy + 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx + 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy + 16))) { checkedPoints.Add(new Point(xx+16, yy+16)); revealAroundBlank(xx + 16, yy + 16);   } else { GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy + 16)].count].SendToBack(); } } catch { }
+        }
+        private void revealAroundBlank(int xx, int yy)
+        {
+            try { if (Grid[GridPoint[new Point(xx - 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy - 16))) { checkedPoints.Add(new Point(xx - 16, yy - 16)); revealAroundBlank(xx - 16, yy - 16); } else { GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy - 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy - 16))) { checkedPoints.Add(new Point(xx, yy - 16)); revealAroundBlank(xx, yy - 16); } else { GridNums[GridPoint[new Point(xx, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx, yy - 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx + 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy - 16))) { checkedPoints.Add(new Point(xx + 16, yy - 16)); revealAroundBlank(xx + 16, yy - 16); } else { GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy - 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx - 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy))) { checkedPoints.Add(new Point(xx - 16, yy)); revealAroundBlank(xx - 16, yy); } else { GridNums[GridPoint[new Point(xx - 16, yy)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx + 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy))) { checkedPoints.Add(new Point(xx + 16, yy)); revealAroundBlank(xx - 16, yy); } else { GridNums[GridPoint[new Point(xx + 16, yy)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx - 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy + 16))) { checkedPoints.Add(new Point(xx - 16, yy + 16)); revealAroundBlank(xx - 16, yy + 16); } else { GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy + 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy + 16))) { checkedPoints.Add(new Point(xx, yy + 16)); revealAroundBlank(xx, yy + 16); } else { GridNums[GridPoint[new Point(xx, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx, yy + 16)].count].SendToBack(); } } catch { }
+            try { if (Grid[GridPoint[new Point(xx + 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy + 16))) { checkedPoints.Add(new Point(xx + 16, yy + 16)); revealAroundBlank(xx + 16, yy + 16); } else { GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy + 16)].count].SendToBack(); } } catch { }
+            return;
         }
         private static DialogResult ShowInputDialog(ref int input)
         {
@@ -185,6 +228,7 @@ namespace Minesweeper
             input = Int32.Parse(textBox.Text);
             return result;
         }
+
     }
     public class tile
     {
