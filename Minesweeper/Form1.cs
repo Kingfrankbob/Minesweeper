@@ -18,7 +18,10 @@ namespace Minesweeper
         public Dictionary<int, bool> buttonStates = new Dictionary<int, bool>();
         public Dictionary<Point, tile> GridPoint = new Dictionary<Point, tile>();
         public List<Point> checkedPoints = new List<Point>();
+        public List<Point> needToCheck = new List<Point>();
         public int mineCountNum = 0;
+        public int mineNum = 0;
+        public int mineNumCorrect = 0;
         public Form1()
         {
             var random = new Random();
@@ -109,12 +112,13 @@ namespace Minesweeper
             {
                 switch (Grid[counter].disNum)
                 {
-                    case 1: picbox.Value.Image = global::Minesweeper.Properties.Resources._1; break;
-                    case 2: picbox.Value.Image = global::Minesweeper.Properties.Resources._2; break;
-                    case 3: picbox.Value.Image = global::Minesweeper.Properties.Resources._3; break;
-                    case 4: picbox.Value.Image = global::Minesweeper.Properties.Resources._4; break;
-                    case 5: picbox.Value.Image = global::Minesweeper.Properties.Resources._5; break;
-                    default: if (Grid[counter].type != 'm') { picbox.Value.Image = null; Grid[counter].changeType('b'); }  break;
+                    case 1: picbox.Value.Image = global::Minesweeper.Properties.Resources._1; Grid[counter].changeType('n'); break;
+                    case 2: picbox.Value.Image = global::Minesweeper.Properties.Resources._2; Grid[counter].changeType('n'); break;
+                    case 3: picbox.Value.Image = global::Minesweeper.Properties.Resources._3; Grid[counter].changeType('n'); break;
+                    case 4: picbox.Value.Image = global::Minesweeper.Properties.Resources._4; Grid[counter].changeType('n'); break;
+                    case 5: picbox.Value.Image = global::Minesweeper.Properties.Resources._5; Grid[counter].changeType('n'); break;
+                    case 0: if (Grid[counter].type != 'm') { picbox.Value.Image = null; Grid[counter].changeType('b'); } else { picbox.Value.Image = global::Minesweeper.Properties.Resources.mine; } break;
+                    default: if (Grid[counter].type != 'm') { picbox.Value.Image = null; Grid[counter].changeType('b'); } else { picbox.Value.Image = global::Minesweeper.Properties.Resources.mine; } break;
                 }
                 counter++;
             }
@@ -124,22 +128,22 @@ namespace Minesweeper
         private void BackButton_Paint(object sender, PaintEventArgs e)
         {
             var blnButtonDown = buttonStates[Int32.Parse(sender.ToString().Split(':')[1])];
-                if (blnButtonDown == false)
-                {
-                    ControlPaint.DrawBorder(e.Graphics, (sender as System.Windows.Forms.Button).ClientRectangle,
-                        System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Outset,
-                        System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Outset,
-                        System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Outset,
-                        System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Outset);
-                }
-                else
-                {
-                    ControlPaint.DrawBorder(e.Graphics, (sender as System.Windows.Forms.Button).ClientRectangle,
-                        System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Inset,
-                        System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Inset,
-                        System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Inset,
-                        System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Inset);
-                }
+            if (blnButtonDown == false)
+            {
+                ControlPaint.DrawBorder(e.Graphics, (sender as System.Windows.Forms.Button).ClientRectangle,
+                    System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Outset,
+                    System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Outset,
+                    System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Outset,
+                    System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Outset);
+            }
+            else
+            {
+                ControlPaint.DrawBorder(e.Graphics, (sender as System.Windows.Forms.Button).ClientRectangle,
+                    System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Inset,
+                    System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Inset,
+                    System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Inset,
+                    System.Drawing.SystemColors.ControlLightLight, 20, ButtonBorderStyle.Inset);
+            }
         }
         private void BackButton_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
@@ -151,43 +155,359 @@ namespace Minesweeper
         }
         private void button_Click(object sender, EventArgs e)
         {
-            var buttonNum = Int32.Parse(sender.ToString().Split(':')[1]);
-            MessageBox.Show(Grid[buttonNum].x.ToString() + "<-X Y->" + Grid[buttonNum].y.ToString() + " Num->" + buttonNum + " SenderToString->" + sender.ToString() + " Mines->" + Grid[buttonNum].disNum);
-            if (Grid[buttonNum].type == 'm') MessageBox.Show("You hit a mine");
-            else
+            
+        }
+
+        private void button_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
             {
-                if (GridNums[buttonNum].Image == null)
+                var buttonNum = Int32.Parse(sender.ToString().Split(':')[1]);
+                // MessageBox.Show(Grid[buttonNum].x.ToString() + "<-X Y->" + Grid[buttonNum].y.ToString() + " Num->" + buttonNum + " SenderToString->" + sender.ToString() + " Mines->" + Grid[buttonNum].disNum);
+                if (Grid[buttonNum].type == 'm') MessageBox.Show("You hit a mine");
+                else
                 {
-                    revealAroundBlank(buttonNum);
+                    if (GridNums[buttonNum].Image == null)
+                    {
+                        revealAroundBlank(buttonNum);
+                        do
+                        {
+                            var next = needToCheck[0];
+                            needToCheck.RemoveAt(0);
+                            checkedPoints.Add(next);
+                            revealAroundBlank(next.X, next.Y);
+                        } while (needToCheck.Count != 0);
+                    }
+                    GridNums[buttonNum].Show();
+                    GridNums[buttonNum].BringToFront();
+                    GridButtons[buttonNum].SendToBack();
                 }
-                GridNums[buttonNum].Show();
-                GridNums[buttonNum].BringToFront();
-                GridButtons[buttonNum].SendToBack();
+            }
+            if(e.Button == MouseButtons.Right)
+            {
+
             }
         }
         private void revealAroundBlank(int number)
         {
             var xx = Grid[number].x;
             var yy = Grid[number].y;
-            try { if (Grid[GridPoint[new Point(xx - 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy - 16))) { checkedPoints.Add(new Point(xx-16, yy-16)); revealAroundBlank(xx - 16, yy - 16);   } else { GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy - 16)].count].SendToBack(); var tf = Grid[GridPoint[new Point(xx - 16, yy - 16)].count].type; MessageBox.Show("False TopRight -> " + tf); } } catch (Exception e){ MessageBox.Show(e.ToString() + " <-Error"); }
-            try { if (Grid[GridPoint[new Point(xx, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy - 16))) { checkedPoints.Add(new Point(xx, yy-16)); revealAroundBlank(xx, yy - 16);  } else { GridNums[GridPoint[new Point(xx, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx, yy - 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx + 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy - 16))) { checkedPoints.Add(new Point(xx+16, yy-16)); revealAroundBlank(xx + 16, yy - 16);  } else { GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy - 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx - 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy))) { checkedPoints.Add(new Point(xx-16, yy)); revealAroundBlank(xx - 16, yy);  } else { GridNums[GridPoint[new Point(xx - 16, yy)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx + 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy))) { checkedPoints.Add(new Point(xx+16, yy)); revealAroundBlank(xx - 16, yy);  } else { GridNums[GridPoint[new Point(xx + 16, yy)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx - 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy + 16))) { checkedPoints.Add(new Point(xx-16, yy+16)); revealAroundBlank(xx - 16, yy + 16); } else { GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy + 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy + 16))) { checkedPoints.Add(new Point(xx, yy+16)); revealAroundBlank(xx, yy + 16);  } else { GridNums[GridPoint[new Point(xx, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx, yy + 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx + 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy + 16))) { checkedPoints.Add(new Point(xx+16, yy+16)); revealAroundBlank(xx + 16, yy + 16);   } else { GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy + 16)].count].SendToBack(); } } catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx - 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy - 16)) && !needToCheck.Contains(new Point(xx - 16, yy - 16)))
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy - 16));
+                    GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy - 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx - 16, yy - 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy - 16));
+                    GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy - 16)].count].SendToBack();
+
+                }
+            }
+            catch (Exception e) { MessageBox.Show(e.ToString() + " <-Error"); }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy - 16)) && !needToCheck.Contains(new Point(xx, yy - 16)))
+                {
+                    checkedPoints.Add(new Point(xx, yy - 16));
+                    GridNums[GridPoint[new Point(xx, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx, yy - 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx, yy - 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx, yy - 16));
+                    GridNums[GridPoint[new Point(xx, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx, yy - 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx + 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy - 16)) && !needToCheck.Contains(new Point(xx + 16, yy - 16)))
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy - 16));
+                    GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy - 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx + 16, yy - 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy - 16));
+                    GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy - 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx - 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy)) && !needToCheck.Contains(new Point(xx - 16, yy)))
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy));
+                    GridNums[GridPoint[new Point(xx - 16, yy)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy)].count].SendToBack();
+                    needToCheck.Add(new Point(xx - 16, yy));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy));
+                    GridNums[GridPoint[new Point(xx - 16, yy)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx + 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy)) && !needToCheck.Contains(new Point(xx + 16, yy)))
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy));
+                    GridNums[GridPoint[new Point(xx + 16, yy)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy)].count].SendToBack();
+                    needToCheck.Add(new Point(xx + 16, yy));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy));
+                    GridNums[GridPoint[new Point(xx + 16, yy)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx - 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy + 16)) && !needToCheck.Contains(new Point(xx - 16, yy + 16)))
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy + 16));
+                    GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy + 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx - 16, yy + 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy + 16));
+                    GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy + 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy + 16)) && !needToCheck.Contains(new Point(xx, yy + 16)))
+                {
+                    checkedPoints.Add(new Point(xx, yy + 16));
+                    GridNums[GridPoint[new Point(xx, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx, yy + 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx, yy + 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx, yy + 16));
+                    GridNums[GridPoint[new Point(xx, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx, yy + 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx + 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy + 16)) && !needToCheck.Contains(new Point(xx + 16, yy + 16)))
+
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy + 16));
+                    GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy + 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx + 16, yy + 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy + 16));
+                    GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy + 16)].count].SendToBack();
+                }
+            }
+            catch { }
         }
+
+
+
+
+
+
+
         private void revealAroundBlank(int xx, int yy)
         {
-            try { if (Grid[GridPoint[new Point(xx - 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy - 16))) { checkedPoints.Add(new Point(xx - 16, yy - 16)); revealAroundBlank(xx - 16, yy - 16); } else { GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy - 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy - 16))) { checkedPoints.Add(new Point(xx, yy - 16)); revealAroundBlank(xx, yy - 16); } else { GridNums[GridPoint[new Point(xx, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx, yy - 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx + 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy - 16))) { checkedPoints.Add(new Point(xx + 16, yy - 16)); revealAroundBlank(xx + 16, yy - 16); } else { GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy - 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx - 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy))) { checkedPoints.Add(new Point(xx - 16, yy)); revealAroundBlank(xx - 16, yy); } else { GridNums[GridPoint[new Point(xx - 16, yy)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx + 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy))) { checkedPoints.Add(new Point(xx + 16, yy)); revealAroundBlank(xx - 16, yy); } else { GridNums[GridPoint[new Point(xx + 16, yy)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx - 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy + 16))) { checkedPoints.Add(new Point(xx - 16, yy + 16)); revealAroundBlank(xx - 16, yy + 16); } else { GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx - 16, yy + 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy + 16))) { checkedPoints.Add(new Point(xx, yy + 16)); revealAroundBlank(xx, yy + 16); } else { GridNums[GridPoint[new Point(xx, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx, yy + 16)].count].SendToBack(); } } catch { }
-            try { if (Grid[GridPoint[new Point(xx + 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy + 16))) { checkedPoints.Add(new Point(xx + 16, yy + 16)); revealAroundBlank(xx + 16, yy + 16); } else { GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].Show(); GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].BringToFront(); GridButtons[GridPoint[new Point(xx + 16, yy + 16)].count].SendToBack(); } } catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx - 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy - 16)) && !needToCheck.Contains(new Point(xx - 16, yy - 16)))
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy - 16));
+                    GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy - 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx - 16, yy - 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy - 16));
+                    GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy - 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy - 16)) && !needToCheck.Contains(new Point(xx, yy - 16)))
+                {
+                    checkedPoints.Add(new Point(xx, yy - 16));
+                    GridNums[GridPoint[new Point(xx, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx, yy - 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx, yy - 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx, yy - 16));
+                    GridNums[GridPoint[new Point(xx, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx, yy - 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx + 16, yy - 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy - 16)) && !needToCheck.Contains(new Point(xx + 16, yy - 16)))
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy - 16));
+                    GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy - 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx + 16, yy - 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy - 16));
+                    GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy - 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy - 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx - 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy)) && !needToCheck.Contains(new Point(xx - 16, yy)))
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy));
+                    GridNums[GridPoint[new Point(xx - 16, yy)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy)].count].SendToBack();
+                    needToCheck.Add(new Point(xx - 16, yy));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy));
+                    GridNums[GridPoint[new Point(xx - 16, yy)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx + 16, yy)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy)) && !needToCheck.Contains(new Point(xx + 16, yy)))
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy));
+                    GridNums[GridPoint[new Point(xx + 16, yy)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy)].count].SendToBack();
+                    needToCheck.Add(new Point(xx + 16, yy));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy));
+                    GridNums[GridPoint[new Point(xx + 16, yy)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx - 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx - 16, yy + 16)) && !needToCheck.Contains(new Point(xx - 16, yy + 16)))
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy + 16));
+                    GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy + 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx - 16, yy + 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx - 16, yy + 16));
+                    GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx - 16, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx - 16, yy + 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx, yy + 16)) && !needToCheck.Contains(new Point(xx, yy + 16)))
+                {
+                    checkedPoints.Add(new Point(xx, yy + 16));
+                    GridNums[GridPoint[new Point(xx, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx, yy + 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx, yy + 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx, yy + 16));
+                    GridNums[GridPoint[new Point(xx, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx, yy + 16)].count].SendToBack();
+                }
+            }
+            catch { }
+            try
+            {
+                if (Grid[GridPoint[new Point(xx + 16, yy + 16)].count].type == 'b' && !checkedPoints.Contains(new Point(xx + 16, yy + 16)) && !needToCheck.Contains(new Point(xx + 16, yy + 16)))
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy + 16));
+                    GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy + 16)].count].SendToBack();
+                    needToCheck.Add(new Point(xx + 16, yy + 16));
+                }
+                else
+                {
+                    checkedPoints.Add(new Point(xx + 16, yy + 16));
+                    GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].Show();
+                    GridNums[GridPoint[new Point(xx + 16, yy + 16)].count].BringToFront();
+                    GridButtons[GridPoint[new Point(xx + 16, yy + 16)].count].SendToBack();
+                }
+            }
+            catch { }
             return;
         }
         private static DialogResult ShowInputDialog(ref int input)
