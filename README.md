@@ -17,8 +17,8 @@ If for some reason the exe does not work, or you dont want to use it, you can op
 ### Why?
 Simply because I wanted to make something like minesweeper for myself to enjoy
 ### ToDo
-- Add a better recur. alg.
-- Make sure all 'sprites' are in the proper places
+- ~~Add a better recur. alg.~~ YESS! Im satisfied with the new one, old ones found in the \unused.txt
+- ~~Make sure all 'sprites' are in the proper places~~ All the checks passed...
 - Add in the right click funtion to show 1. Blank ( ) 2. Mine (\*) 3. Question Mark (?)
 ### License
 If this application does not contain a license, it should be under the MIT License, unless otherwise stated in my profile BIO.
