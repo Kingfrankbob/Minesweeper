@@ -16,8 +16,12 @@ namespace Minesweeper
         public Dictionary<int, tile> Grid = new Dictionary<int, tile>();
         public Dictionary<int, Button> GridButtons = new Dictionary<int, Button>();
         public Dictionary<int, PictureBox> GridNums = new Dictionary<int, PictureBox>();
+        public Dictionary<int, PictureBox> GridFlags = new Dictionary<int, PictureBox>();
+        public Dictionary<(int x, int y), int> pointToNum = new Dictionary<(int x, int y), int>();
         public Dictionary<int, bool> buttonStates = new Dictionary<int, bool>();
         public Dictionary<Point, tile> GridPoint = new Dictionary<Point, tile>();
+        public List<int> correctHits = new List<int>();
+        public List<int> generalHits = new List<int>();
         public List<int> MineList = new List<int>();
         public int mineCountNum = 0;
         public int mineNum = 0;
@@ -26,10 +30,19 @@ namespace Minesweeper
         {
             var random = new Random();
             var Yes = ShowInputDialog(ref mineCountNum);
+            
+            mineNum = mineCountNum;
             int boardx = 16, boardy = 16;
             if (mineCountNum == 99) { boardx = 30; boardy = 16; }
             else if (mineCountNum < 99 && mineCountNum > 40) { boardx = 16; boardy = 16; }
             else { boardx = 10; boardy = 10; }
+
+            MessageBox.Show(((boardy + 72) * 16).ToString() + " " + ((boardy + 72) * 16).ToString());
+
+            Size = new Size((boardy + 72) * 16, (boardy + 72) * 16);
+
+
+
             InitializeComponent();
             int xx = 24, yy = 48, counter = 0;
             for (int i = 0; i < boardy; i++)
@@ -37,6 +50,12 @@ namespace Minesweeper
                 for (int j = 0; j < boardx; j++)
                 {
                     var picbox = new System.Windows.Forms.PictureBox();
+                    var flagbox = new System.Windows.Forms.PictureBox();
+                    flagbox.Name = counter.ToString();
+                    flagbox.Hide();
+                    flagbox.Location = new System.Drawing.Point(xx, yy);
+                    flagbox.Size = new System.Drawing.Size(16, 16);
+                    flagbox.MouseDown += pic_MouseDown;
                     picbox.Name = counter.ToString();
                     picbox.Hide();
                     picbox.Location = new System.Drawing.Point(xx, yy);
@@ -61,8 +80,11 @@ namespace Minesweeper
                     buttonStates.Add(counter, false);
                     GridButtons.Add(counter, button);
                     this.Controls.Add(picbox);
+                    this.Controls.Add(flagbox);
+                    GridFlags.Add(counter, flagbox);
                     GridNums.Add(counter, picbox);
                     this.Controls.Add(button);
+                    pointToNum.Add((xx, yy), counter);
                     xx += 16;
                     counter++;
                 }
@@ -164,6 +186,16 @@ namespace Minesweeper
         {
 
         }
+        private void pic_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Right Clicckckckkckckckckckkckckckckc
+                var send = sender as PictureBox;
+                var buttonNum = Int32.Parse(send.Name);
+                handleImage(buttonNum);
+            }
+        }
 
         private void button_MouseDown(object sender, MouseEventArgs e)
         {
@@ -179,6 +211,16 @@ namespace Minesweeper
                         GridButtons[item].SendToBack();
                     }
                     MessageBox.Show("You hit a mine\nGame Over!!! :(");
+                    foreach(var item in Grid)
+                        if(item.Value.type == 'm')
+                        {
+                            // Set the Mine to a red background one to see what they missed XD or not whatevers
+                            GridButtons[buttonNum].Hide();
+                            GridButtons[buttonNum].SendToBack();
+                            //GridNums[buttonNum].Image = 
+                            GridNums[buttonNum].Show();
+                            GridNums[buttonNum].BringToFront();
+                        }
                     Application.Restart();
                 }
                 else
@@ -194,9 +236,63 @@ namespace Minesweeper
             }
             if (e.Button == MouseButtons.Right)
             {
-
+                var buttonNum = Int32.Parse(sender.ToString().Split(':')[1]);
+                buttonStates[buttonNum] = false;
+                handleImage(buttonNum);
             }
         }
+
+        private void handleImage(int buttonNum)
+        {
+            mineNumberBox.Text = (mineNum - generalHits.Count).ToString();
+            var current = Grid[buttonNum].disPlay;
+            current++;
+            if (current > 2) current = 0;
+            Grid[buttonNum].disPlay = current;
+
+            if (current == 0)
+            {
+                GridFlags[buttonNum].Image = global::Minesweeper.Properties.Resources.Mineflag;
+                GridFlags[buttonNum].BringToFront();
+                GridFlags[buttonNum].Show();
+                if (!generalHits.Contains(buttonNum)) generalHits.Add(buttonNum);
+
+                if (Grid[buttonNum].type == 'm')
+                {
+                    if (!correctHits.Contains(buttonNum))
+                    {
+                        correctHits.Add(buttonNum);
+                    }
+                }
+                mineNumberBox.Text = (mineNum - generalHits.Count).ToString();
+                if(correctHits.Count == mineCountNum)
+                {
+                    MessageBox.Show("Good Job, you Won!!");
+                    Application.Restart();
+                }
+
+
+            }
+            else if (current == 1)
+            {
+                GridFlags[buttonNum].Image = global::Minesweeper.Properties.Resources.Questionmark;
+                GridFlags[buttonNum].BringToFront();
+                GridFlags[buttonNum].Show();
+                if (correctHits.Contains(buttonNum)) correctHits.Remove(buttonNum);
+                if (generalHits.Contains(buttonNum)) generalHits.Remove(buttonNum);
+            }
+            else if (current == 2)
+            {
+                GridNums[buttonNum].Image = null;
+                GridFlags[buttonNum].SendToBack();
+                GridFlags[buttonNum].Hide();
+                if (generalHits.Contains(buttonNum)) generalHits.Remove(buttonNum);
+                if (correctHits.Contains(buttonNum)) correctHits.Remove(buttonNum);
+                //Grid[buttonNum].
+            }
+        
+
+    }
 
         private void revealAroundNew(int num)
         {
@@ -283,13 +379,16 @@ namespace Minesweeper
         public int count { get; private set; }
         public char type { get; private set; }
         public int disNum { get; set; }
+        public int disPlay { get; set; }
         public bool revealed { get; set; }
+        public bool correct { get; set; }
         public tile(int x, int y, int count, char type)
         {
             this.x = x;
             this.y = y;
             this.count = count;
             this.type = type;
+            this.disPlay = 2;
         }
         public tile(int x, int y, int count)
         {

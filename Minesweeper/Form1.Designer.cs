@@ -31,6 +31,7 @@
             this.mineCount = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.mineNumberBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // mineCount
@@ -59,7 +60,7 @@
             this.textBox1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.Location = new System.Drawing.Point(13, 13);
+            this.textBox1.Location = new System.Drawing.Point(12, 12);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
@@ -67,17 +68,28 @@
             this.textBox1.TabIndex = 2;
             this.textBox1.Text = "Mines: ";
             // 
+            // mineNumberBox
+            // 
+            this.mineNumberBox.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.mineNumberBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.mineNumberBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.mineNumberBox.Location = new System.Drawing.Point(105, 12);
+            this.mineNumberBox.Name = "mineNumberBox";
+            this.mineNumberBox.Size = new System.Drawing.Size(100, 32);
+            this.mineNumberBox.TabIndex = 3;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.ClientSize = new System.Drawing.Size(776, 800);
+            this.ClientSize = new System.Drawing.Size(405, 421);
+            this.Controls.Add(this.mineNumberBox);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.mineCount);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "MINESWEEPER";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -88,6 +100,7 @@
         private System.Windows.Forms.TextBox mineCount;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox mineNumberBox;
     }
 }
 
