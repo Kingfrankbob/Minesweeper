@@ -31,6 +31,11 @@ namespace Minesweeper
         {
             var random = new Random();
             var Yes = ShowInputDialog(ref mineCountNum);
+            if (mineCountNum < 1 || mineCountNum > 99)
+            {
+                MessageBox.Show("Invalid number of mines, please try again.");
+                Application.Restart();
+            }
             InitializeComponent();
             createBoard(random);
         }
