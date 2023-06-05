@@ -24,7 +24,6 @@ namespace Minesweeper
         private List<int> _MineList = new List<int>();
         private int _mineCountNum = 0;
         private int _mineNum = 0;
-        private int _mineNumCorrect = 0;
         private bool _isCollapsed = true;
         public Form1()
         {
@@ -54,7 +53,7 @@ namespace Minesweeper
                 item.Value.Enabled = false;
                 this.Controls.Remove(item.Value);
             }
-            _GridButtons.Clear(); _GridFlags.Clear(); _GridNums.Clear(); _pointToNum.Clear(); _buttonStates.Clear(); _GridPoint.Clear(); _correctHits.Clear(); _generalHits.Clear(); _MineList.Clear(); _mineNum = 0; _mineNumCorrect = 0;
+            _GridButtons.Clear(); _GridFlags.Clear(); _GridNums.Clear(); _pointToNum.Clear(); _buttonStates.Clear(); _GridPoint.Clear(); _correctHits.Clear(); _generalHits.Clear(); _MineList.Clear(); _mineNum = 0;
 
         }
         private void createBoard(Random random)
