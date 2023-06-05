@@ -26,6 +26,7 @@ namespace Minesweeper
         public int mineCountNum = 0;
         public int mineNum = 0;
         public int mineNumCorrect = 0;
+        private bool _isCollapsed = true;
         public Form1()
         {
             var random = new Random();
@@ -36,7 +37,7 @@ namespace Minesweeper
         private void clearEverything()
         {
             Grid.Clear();
-            foreach(var item in GridButtons)
+            foreach (var item in GridButtons)
             {
                 item.Value.Hide();
                 item.Value.Enabled = false;
@@ -46,7 +47,7 @@ namespace Minesweeper
             {
                 item.Value.Hide();
                 item.Value.Enabled = false;
-                this.Controls.Remove(item.Value);  
+                this.Controls.Remove(item.Value);
             }
             foreach (var item in GridNums)
             {
@@ -54,7 +55,7 @@ namespace Minesweeper
                 item.Value.Enabled = false;
                 this.Controls.Remove(item.Value);
             }
-            GridButtons.Clear();GridFlags.Clear();GridNums.Clear(); pointToNum.Clear();buttonStates.Clear();GridPoint.Clear();correctHits.Clear();generalHits.Clear();MineList.Clear();mineNum = 0;mineNumCorrect = 0;
+            GridButtons.Clear(); GridFlags.Clear(); GridNums.Clear(); pointToNum.Clear(); buttonStates.Clear(); GridPoint.Clear(); correctHits.Clear(); generalHits.Clear(); MineList.Clear(); mineNum = 0; mineNumCorrect = 0;
 
         }
         private void createBoard(Random random)
@@ -64,7 +65,8 @@ namespace Minesweeper
             int boardx = 16, boardy = 16;
             if (mineCountNum == 99) { boardx = 30; boardy = 16; }
             else if (mineCountNum < 99 && mineCountNum > 40) { boardx = 16; boardy = 16; }
-            else { boardx = 10; boardy = 10; }
+            else if (mineCountNum <= 40 && mineCountNum > 2) { boardx = 10; boardy = 10; }
+            else { boardx = 2; boardy = 2; }
 
             int xx = 24, yy = 48, counter = 0;
             for (int i = 0; i < boardy; i++)
@@ -177,17 +179,6 @@ namespace Minesweeper
             Size = new Size((boardx * 16) + 72, (boardy * 16) + 112);
             this.Size = Size;
         }
-        //private void Form1_Load(object sender, EventArgs e)
-        //{
-        //    mineNum = mineCountNum;
-        //    int boardx = 16, boardy = 16;
-        //    if (mineCountNum == 99) { boardx = 30; boardy = 16; }
-        //    else if (mineCountNum < 99 && mineCountNum > 40) { boardx = 16; boardy = 16; }
-        //    else { boardx = 10; boardy = 10; }
-        //    //MessageBox.Show(((boardx * 16) + 72).ToString() + " <- X Y ->  " + ((boardy * 16) + 72).ToString() + " " + boardx + " BoardX BoardY " + boardy);
-        //    Size = new Size((boardx * 16) + 72, (boardy * 16) + 112);
-        //    this.Size = Size;
-        //}
         private void BackButton_Paint(object sender, PaintEventArgs e)
         {
             var blnButtonDown = buttonStates[Int32.Parse(sender.ToString().Split(':')[1])];
@@ -244,13 +235,12 @@ namespace Minesweeper
                         GridButtons[item].SendToBack();
                     }
                     MessageBox.Show("You hit a mine\nGame Over!!! :(");
-                    foreach(var item in Grid)
-                        if(item.Value.type == 'm')
+                    foreach (var item in Grid)
+                        if (item.Value.type == 'm')
                         {
                             // Set the Mine to a red background one to see what they missed XD or not whatevers
                             GridButtons[buttonNum].Hide();
                             GridButtons[buttonNum].SendToBack();
-                            //GridNums[buttonNum].Image = 
                             GridNums[buttonNum].Show();
                             GridNums[buttonNum].BringToFront();
                         }
@@ -297,9 +287,14 @@ namespace Minesweeper
                     }
                 }
                 mineNumberBox.Text = (mineNum - generalHits.Count).ToString();
-                if(correctHits.Count == mineCountNum)
+                if (correctHits.Count == mineCountNum && mineCountNum != 69)
                 {
                     MessageBox.Show("Good Job, you Won!!");
+                    Application.Restart();
+                }
+                else if (correctHits.Count == mineCountNum && mineCountNum == 69)
+                {
+                    MessageBox.Show("😎 Nice! B)");
                     Application.Restart();
                 }
 
@@ -322,9 +317,9 @@ namespace Minesweeper
                 if (correctHits.Contains(buttonNum)) correctHits.Remove(buttonNum);
                 //Grid[buttonNum].
             }
-        
 
-    }
+
+        }
         private void revealAroundNew(int num)
         {
             var xx = Grid[num].x;
@@ -405,6 +400,51 @@ namespace Minesweeper
             var random = new Random();
             var Yes = ShowInputDialog(ref mineCountNum);
             createBoard(random);
+        }
+        private void Hard_Click(object sender, EventArgs e)
+        {
+            var random = new Random();
+            mineCountNum = 99;
+            createBoard(random);
+        }
+        private void Medium_Click(object sender, EventArgs e)
+        {
+            var random = new Random();
+            mineCountNum = 55;
+            createBoard(random);
+        }
+        private void Easy_Click(object sender, EventArgs e)
+        {
+            var random = new Random();
+            mineCountNum = 22;
+            createBoard(random);
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (_isCollapsed)
+            {
+                panel1.Height += 10;
+                if (panel1.Size.Height >= 93) // 88, 131
+                {
+                    timer1.Stop();
+                    _isCollapsed = false;
+                }
+            }
+            else
+            {
+                panel1.Height -= 10;
+                if (panel1.Size.Height <= 22)
+                {
+                    timer1.Stop();
+                    _isCollapsed = true;
+                }
+            }
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            timer1.Start();
         }
     }
     public class tile
