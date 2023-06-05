@@ -10,64 +10,63 @@ using System.Windows.Forms;
 
 namespace Minesweeper
 {
-    // Next is right click function!!!
     public partial class Form1 : Form
     {
-        public Dictionary<int, tile> Grid = new Dictionary<int, tile>();
-        public Dictionary<int, Button> GridButtons = new Dictionary<int, Button>();
-        public Dictionary<int, PictureBox> GridNums = new Dictionary<int, PictureBox>();
-        public Dictionary<int, PictureBox> GridFlags = new Dictionary<int, PictureBox>();
-        public Dictionary<(int x, int y), int> pointToNum = new Dictionary<(int x, int y), int>();
-        public Dictionary<int, bool> buttonStates = new Dictionary<int, bool>();
-        public Dictionary<Point, tile> GridPoint = new Dictionary<Point, tile>();
-        public List<int> correctHits = new List<int>();
-        public List<int> generalHits = new List<int>();
-        public List<int> MineList = new List<int>();
-        public int mineCountNum = 0;
-        public int mineNum = 0;
-        public int mineNumCorrect = 0;
+        private Dictionary<int, tile> _Grid = new Dictionary<int, tile>();
+        private Dictionary<int, Button> _GridButtons = new Dictionary<int, Button>();
+        private Dictionary<int, PictureBox> _GridNums = new Dictionary<int, PictureBox>();
+        private Dictionary<int, PictureBox> _GridFlags = new Dictionary<int, PictureBox>();
+        private Dictionary<(int x, int y), int> _pointToNum = new Dictionary<(int x, int y), int>();
+        private Dictionary<int, bool> _buttonStates = new Dictionary<int, bool>();
+        private Dictionary<Point, tile> _GridPoint = new Dictionary<Point, tile>();
+        private List<int> _correctHits = new List<int>();
+        private List<int> _generalHits = new List<int>();
+        private List<int> _MineList = new List<int>();
+        private int _mineCountNum = 0;
+        private int _mineNum = 0;
+        private int _mineNumCorrect = 0;
         private bool _isCollapsed = true;
         public Form1()
         {
             var random = new Random();
-            mineCountNum = 30;
+            _mineCountNum = 30;
             InitializeComponent();
             createBoard(random);
         }
         private void clearEverything()
         {
-            Grid.Clear();
-            foreach (var item in GridButtons)
+            _Grid.Clear();
+            foreach (var item in _GridButtons)
             {
                 item.Value.Hide();
                 item.Value.Enabled = false;
                 this.Controls.Remove(item.Value);
             }
-            foreach (var item in GridFlags)
+            foreach (var item in _GridFlags)
             {
                 item.Value.Hide();
                 item.Value.Enabled = false;
                 this.Controls.Remove(item.Value);
             }
-            foreach (var item in GridNums)
+            foreach (var item in _GridNums)
             {
                 item.Value.Hide();
                 item.Value.Enabled = false;
                 this.Controls.Remove(item.Value);
             }
-            GridButtons.Clear(); GridFlags.Clear(); GridNums.Clear(); pointToNum.Clear(); buttonStates.Clear(); GridPoint.Clear(); correctHits.Clear(); generalHits.Clear(); MineList.Clear(); mineNum = 0; mineNumCorrect = 0;
+            _GridButtons.Clear(); _GridFlags.Clear(); _GridNums.Clear(); _pointToNum.Clear(); _buttonStates.Clear(); _GridPoint.Clear(); _correctHits.Clear(); _generalHits.Clear(); _MineList.Clear(); _mineNum = 0; _mineNumCorrect = 0;
 
         }
         private void createBoard(Random random)
         {
             clearEverything();
-            mineNum = mineCountNum;
+            _mineNum = _mineCountNum;
             int boardx = 16, boardy = 16;
-            if (mineCountNum == 99) { boardx = 30; boardy = 16; }
-            else if (mineCountNum < 99 && mineCountNum > 40) { boardx = 16; boardy = 16; }
-            else if (mineCountNum > 20 && mineCountNum <= 40) { boardx = mineCountNum / 2; boardy = mineCountNum / 2; }
-            else if (mineCountNum <= 20 && mineCountNum > 5) { boardx = 10; boardy = 10; }
-            else if (mineCountNum != 1) { boardx = 3; boardy = 3; }
+            if (_mineCountNum == 99) { boardx = 30; boardy = 16; }
+            else if (_mineCountNum < 99 && _mineCountNum > 40) { boardx = 16; boardy = 16; }
+            else if (_mineCountNum > 20 && _mineCountNum <= 40) { boardx = _mineCountNum / 2; boardy = _mineCountNum / 2; }
+            else if (_mineCountNum <= 20 && _mineCountNum > 5) { boardx = 10; boardy = 10; }
+            else if (_mineCountNum != 1) { boardx = 3; boardy = 3; }
             else { boardx = 1; boardy = 1; }
 
             int xx = 24, yy = 48, counter = 0;
@@ -86,7 +85,7 @@ namespace Minesweeper
                     picbox.Hide();
                     picbox.Location = new System.Drawing.Point(xx, yy);
                     picbox.Size = new System.Drawing.Size(16, 16);
-                    Grid.Add(counter, new tile(xx, yy, counter, 'n'));
+                    _Grid.Add(counter, new tile(xx, yy, counter, 'n'));
                     var button = new System.Windows.Forms.Button();
                     button.Name = counter.ToString();
                     button.Show();
@@ -102,15 +101,15 @@ namespace Minesweeper
                     button.MouseDown += button_MouseDown;
                     button.Paint += BackButton_Paint;
                     button.ForeColor = System.Drawing.Color.Black;
-                    GridPoint.Add(button.Location, new tile(xx, yy, counter, 'n'));
-                    buttonStates.Add(counter, false);
-                    GridButtons.Add(counter, button);
+                    _GridPoint.Add(button.Location, new tile(xx, yy, counter, 'n'));
+                    _buttonStates.Add(counter, false);
+                    _GridButtons.Add(counter, button);
                     this.Controls.Add(picbox);
                     this.Controls.Add(flagbox);
-                    GridFlags.Add(counter, flagbox);
-                    GridNums.Add(counter, picbox);
+                    _GridFlags.Add(counter, flagbox);
+                    _GridNums.Add(counter, picbox);
                     this.Controls.Add(button);
-                    pointToNum.Add((xx, yy), counter);
+                    _pointToNum.Add((xx, yy), counter);
                     xx += 16;
                     counter++;
                 }
@@ -120,7 +119,7 @@ namespace Minesweeper
             var maxLimit = boardx * boardy;
 
             var randomList = new List<int>();
-            for (int i = 0; i < mineCountNum; i++)
+            for (int i = 0; i < _mineCountNum; i++)
             {
                 var rad = random.Next(0, maxLimit);
                 if (!randomList.Contains(rad)) randomList.Add(rad);
@@ -137,56 +136,56 @@ namespace Minesweeper
             }
             foreach (var value in randomList)
             {
-                Grid[value].changeType('m');
-                MineList.Add(value);
-                int xxx = Grid[value].x;
-                int yyy = Grid[value].y;
-                GridPoint[new Point(xxx, yyy)].changeType('m');
+                _Grid[value].changeType('m');
+                _MineList.Add(value);
+                int xxx = _Grid[value].x;
+                int yyy = _Grid[value].y;
+                _GridPoint[new Point(xxx, yyy)].changeType('m');
             }
-            for (int i = 0; i < Grid.Count() - 1; i++)
+            for (int i = 0; i < _Grid.Count() - 1; i++)
             {
-                if (Grid[i].type == 'm') continue;
+                if (_Grid[i].type == 'm') continue;
                 byte total = 0;
-                xx = Grid[i].x;
-                yy = Grid[i].y;
+                xx = _Grid[i].x;
+                yy = _Grid[i].y;
                 // 1 2 3 
                 // 4 P 5
                 // 6 7 8
-                try { if (GridPoint[new Point(xx - 16, yy - 16)].type == 'm') total++; } catch { }
-                try { if (GridPoint[new Point(xx, yy - 16)].type == 'm') total++; } catch { }
-                try { if (GridPoint[new Point(xx + 16, yy - 16)].type == 'm') total++; } catch { }
-                try { if (GridPoint[new Point(xx - 16, yy)].type == 'm') total++; } catch { }
-                try { if (GridPoint[new Point(xx + 16, yy)].type == 'm') total++; } catch { }
-                try { if (GridPoint[new Point(xx - 16, yy + 16)].type == 'm') total++; } catch { }
-                try { if (GridPoint[new Point(xx, yy + 16)].type == 'm') total++; } catch { }
-                try { if (GridPoint[new Point(xx + 16, yy + 16)].type == 'm') total++; } catch { }
-                Grid[i].disNum = total;
+                try { if (_GridPoint[new Point(xx - 16, yy - 16)].type == 'm') total++; } catch { }
+                try { if (_GridPoint[new Point(xx, yy - 16)].type == 'm') total++; } catch { }
+                try { if (_GridPoint[new Point(xx + 16, yy - 16)].type == 'm') total++; } catch { }
+                try { if (_GridPoint[new Point(xx - 16, yy)].type == 'm') total++; } catch { }
+                try { if (_GridPoint[new Point(xx + 16, yy)].type == 'm') total++; } catch { }
+                try { if (_GridPoint[new Point(xx - 16, yy + 16)].type == 'm') total++; } catch { }
+                try { if (_GridPoint[new Point(xx, yy + 16)].type == 'm') total++; } catch { }
+                try { if (_GridPoint[new Point(xx + 16, yy + 16)].type == 'm') total++; } catch { }
+                _Grid[i].disNum = total;
             }
             counter = 0;
-            foreach (var picbox in GridNums)
+            foreach (var picbox in _GridNums)
             {
-                switch (Grid[counter].disNum)
+                switch (_Grid[counter].disNum)
                 {
-                    case 1: picbox.Value.Image = global::Minesweeper.Properties.Resources._1; Grid[counter].changeType('n'); break;
-                    case 2: picbox.Value.Image = global::Minesweeper.Properties.Resources._2; Grid[counter].changeType('n'); break;
-                    case 3: picbox.Value.Image = global::Minesweeper.Properties.Resources._3; Grid[counter].changeType('n'); break;
-                    case 4: picbox.Value.Image = global::Minesweeper.Properties.Resources._4; Grid[counter].changeType('n'); break;
-                    case 5: picbox.Value.Image = global::Minesweeper.Properties.Resources._5; Grid[counter].changeType('n'); break;
-                    //case 6: picbox.Value.Image = global::Minesweeper.Properties.Resources._6; Grid[counter].changeType('n'); break;
-                    //case 7: picbox.Value.Image = global::Minesweeper.Properties.Resources._7; Grid[counter].changeType('n'); break;
-                    //case 8: picbox.Value.Image = global::Minesweeper.Properties.Resources._8; Grid[counter].changeType('n'); break;
-                    case 0: if (Grid[counter].type != 'm') { picbox.Value.Image = null; Grid[counter].changeType('b'); } else { picbox.Value.Image = global::Minesweeper.Properties.Resources.mine; } break;
-                    default: if (Grid[counter].type != 'm') { picbox.Value.Image = null; Grid[counter].changeType('b'); } else { picbox.Value.Image = global::Minesweeper.Properties.Resources.mine; } break;
+                    case 1: picbox.Value.Image = global::Minesweeper.Properties.Resources._1; _Grid[counter].changeType('n'); break;
+                    case 2: picbox.Value.Image = global::Minesweeper.Properties.Resources._2; _Grid[counter].changeType('n'); break;
+                    case 3: picbox.Value.Image = global::Minesweeper.Properties.Resources._3; _Grid[counter].changeType('n'); break;
+                    case 4: picbox.Value.Image = global::Minesweeper.Properties.Resources._4; _Grid[counter].changeType('n'); break;
+                    case 5: picbox.Value.Image = global::Minesweeper.Properties.Resources._5; _Grid[counter].changeType('n'); break;
+                    //case 6: picbox.Value.Image = global::Minesweeper.Properties.Resources._6; _Grid[counter].changeType('n'); break;
+                    //case 7: picbox.Value.Image = global::Minesweeper.Properties.Resources._7; _Grid[counter].changeType('n'); break;
+                    //case 8: picbox.Value.Image = global::Minesweeper.Properties.Resources._8; _Grid[counter].changeType('n'); break;
+                    case 0: if (_Grid[counter].type != 'm') { picbox.Value.Image = null; _Grid[counter].changeType('b'); } else { picbox.Value.Image = global::Minesweeper.Properties.Resources.mine; } break;
+                    default: if (_Grid[counter].type != 'm') { picbox.Value.Image = null; _Grid[counter].changeType('b'); } else { picbox.Value.Image = global::Minesweeper.Properties.Resources.mine; } break;
                 }
                 counter++;
             }
-            mineNumberBox.Text = mineCountNum.ToString();
+            mineNumberBox.Text = _mineCountNum.ToString();
             Size = new Size((boardx * 16) + 72, (boardy * 16) + 112);
             this.Size = Size;
         }
         private void BackButton_Paint(object sender, PaintEventArgs e)
         {
-            var blnButtonDown = buttonStates[Int32.Parse(sender.ToString().Split(':')[1])];
+            var blnButtonDown = _buttonStates[Int32.Parse(sender.ToString().Split(':')[1])];
             if (blnButtonDown == false)
             {
                 ControlPaint.DrawBorder(e.Graphics, (sender as System.Windows.Forms.Button).ClientRectangle,
@@ -206,11 +205,11 @@ namespace Minesweeper
         }
         private void BackButton_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            buttonStates[Int32.Parse(sender.ToString().Split(':')[1])] = true;
+            _buttonStates[Int32.Parse(sender.ToString().Split(':')[1])] = true;
         }
         private void BackButton_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            buttonStates[Int32.Parse(sender.ToString().Split(':')[1])] = false;
+            _buttonStates[Int32.Parse(sender.ToString().Split(':')[1])] = false;
         }
         private void button_Click(object sender, EventArgs e)
         {
@@ -231,23 +230,23 @@ namespace Minesweeper
             if (e.Button == MouseButtons.Left)
             {
                 var buttonNum = Int32.Parse(sender.ToString().Split(':')[1]);
-                if (Grid[buttonNum].type == 'm')
+                if (_Grid[buttonNum].type == 'm')
                 {
-                    foreach (var item in MineList)
+                    foreach (var item in _MineList)
                     {
-                        GridNums[item].Show();
-                        GridNums[item].BringToFront();
-                        GridButtons[item].SendToBack();
+                        _GridNums[item].Show();
+                        _GridNums[item].BringToFront();
+                        _GridButtons[item].SendToBack();
                     }
                     MessageBox.Show("You hit a mine\nGame Over!!! :(");
-                    foreach (var item in Grid)
+                    foreach (var item in _Grid)
                         if (item.Value.type == 'm')
                         {
                             // Set the Mine to a red background one to see what they missed XD or not whatevers
-                            GridButtons[buttonNum].Hide();
-                            GridButtons[buttonNum].SendToBack();
-                            GridNums[buttonNum].Show();
-                            GridNums[buttonNum].BringToFront();
+                            _GridButtons[buttonNum].Hide();
+                            _GridButtons[buttonNum].SendToBack();
+                            _GridNums[buttonNum].Show();
+                            _GridNums[buttonNum].BringToFront();
                         }
                     var random = new Random();
                     MessageBox.Show("Restarting Game");
@@ -255,57 +254,57 @@ namespace Minesweeper
                 }
                 else
                 {
-                    if (GridNums[buttonNum].Image == null)
+                    if (_GridNums[buttonNum].Image == null)
                     {
                         revealAroundNew(buttonNum);
                     }
-                    GridNums[buttonNum].Show();
-                    GridNums[buttonNum].BringToFront();
-                    GridButtons[buttonNum].SendToBack();
+                    _GridNums[buttonNum].Show();
+                    _GridNums[buttonNum].BringToFront();
+                    _GridButtons[buttonNum].SendToBack();
                 }
             }
             if (e.Button == MouseButtons.Right)
             {
                 var buttonNum = Int32.Parse(sender.ToString().Split(':')[1]);
-                buttonStates[buttonNum] = false;
+                _buttonStates[buttonNum] = false;
                 handleImage(buttonNum);
             }
         }
         private void handleImage(int buttonNum)
         {
-            mineNumberBox.Text = (mineNum - generalHits.Count).ToString();
-            var current = Grid[buttonNum].disPlay;
+            mineNumberBox.Text = (_mineNum - _generalHits.Count).ToString();
+            var current = _Grid[buttonNum].disPlay;
             current++;
             if (current > 2) current = 0;
-            Grid[buttonNum].disPlay = current;
+            _Grid[buttonNum].disPlay = current;
 
             if (current == 0)
             {
-                GridFlags[buttonNum].Image = global::Minesweeper.Properties.Resources.Mineflag;
-                GridFlags[buttonNum].BringToFront();
-                GridFlags[buttonNum].Show();
-                if (!generalHits.Contains(buttonNum)) generalHits.Add(buttonNum);
+                _GridFlags[buttonNum].Image = global::Minesweeper.Properties.Resources.Mineflag;
+                _GridFlags[buttonNum].BringToFront();
+                _GridFlags[buttonNum].Show();
+                if (!_generalHits.Contains(buttonNum)) _generalHits.Add(buttonNum);
 
-                if (Grid[buttonNum].type == 'm')
+                if (_Grid[buttonNum].type == 'm')
                 {
-                    if (!correctHits.Contains(buttonNum))
+                    if (!_correctHits.Contains(buttonNum))
                     {
-                        correctHits.Add(buttonNum);
+                        _correctHits.Add(buttonNum);
                     }
                 }
-                mineNumberBox.Text = (mineNum - generalHits.Count).ToString();
-                if (correctHits.Count == mineCountNum && mineCountNum != 69)
+                mineNumberBox.Text = (_mineNum - _generalHits.Count).ToString();
+                if (_correctHits.Count == _mineCountNum && _mineCountNum != 69)
                 {
                     MessageBox.Show("Good Job, you Won!!");
                     var random = new Random();
                     MessageBox.Show("Restarting Game");
-                    mineCountNum = correctHits.Count;
+                    _mineCountNum = _correctHits.Count;
                     createBoard(random);
                 }
-                else if (correctHits.Count == mineCountNum && mineCountNum == 69)
+                else if (_correctHits.Count == _mineCountNum && _mineCountNum == 69)
                 {
                     MessageBox.Show("😎 Nice! B)");
-                    mineCountNum = 69;
+                    _mineCountNum = 69;
                     MessageBox.Show("Restarting Game");
                     var random = new Random();
                     createBoard(random);
@@ -315,52 +314,52 @@ namespace Minesweeper
             }
             else if (current == 1)
             {
-                GridFlags[buttonNum].Image = global::Minesweeper.Properties.Resources.Questionmark;
-                GridFlags[buttonNum].BringToFront();
-                GridFlags[buttonNum].Show();
-                if (correctHits.Contains(buttonNum)) correctHits.Remove(buttonNum);
-                if (generalHits.Contains(buttonNum)) generalHits.Remove(buttonNum);
+                _GridFlags[buttonNum].Image = global::Minesweeper.Properties.Resources.Questionmark;
+                _GridFlags[buttonNum].BringToFront();
+                _GridFlags[buttonNum].Show();
+                if (_correctHits.Contains(buttonNum)) _correctHits.Remove(buttonNum);
+                if (_generalHits.Contains(buttonNum)) _generalHits.Remove(buttonNum);
             }
             else if (current == 2)
             {
-                GridNums[buttonNum].Image = null;
-                GridFlags[buttonNum].SendToBack();
-                GridFlags[buttonNum].Hide();
-                if (generalHits.Contains(buttonNum)) generalHits.Remove(buttonNum);
-                if (correctHits.Contains(buttonNum)) correctHits.Remove(buttonNum);
-                //Grid[buttonNum].
+                _GridNums[buttonNum].Image = null;
+                _GridFlags[buttonNum].SendToBack();
+                _GridFlags[buttonNum].Hide();
+                if (_generalHits.Contains(buttonNum)) _generalHits.Remove(buttonNum);
+                if (_correctHits.Contains(buttonNum)) _correctHits.Remove(buttonNum);
+                //_Grid[buttonNum].
             }
 
 
         }
         private void revealAroundNew(int num)
         {
-            var xx = Grid[num].x;
-            var yy = Grid[num].y;
+            var xx = _Grid[num].x;
+            var yy = _Grid[num].y;
             var points = new (int x, int y)[] { (xx + 16, yy), (xx - 16, yy), (xx, yy - 16), (xx, yy + 16) };
             foreach (var value in points)
                 try
                 {
                     int i = value.x, j = value.y;
-                    if (Grid[GridPoint[new Point(i, j)].count].type == 'b')
+                    if (_Grid[_GridPoint[new Point(i, j)].count].type == 'b')
                     {
-                        if (Grid[GridPoint[new Point(i, j)].count].revealed)
+                        if (_Grid[_GridPoint[new Point(i, j)].count].revealed)
                         {
                             continue;
                         }
-                        Grid[GridPoint[new Point(i, j)].count].revealed = true;
-                        GridNums[GridPoint[new Point(i, j)].count].Show();
-                        GridNums[GridPoint[new Point(i, j)].count].BringToFront();
-                        GridButtons[GridPoint[new Point(i, j)].count].SendToBack();
-                        revealAroundNew(GridPoint[new Point(i, j)].count);
+                        _Grid[_GridPoint[new Point(i, j)].count].revealed = true;
+                        _GridNums[_GridPoint[new Point(i, j)].count].Show();
+                        _GridNums[_GridPoint[new Point(i, j)].count].BringToFront();
+                        _GridButtons[_GridPoint[new Point(i, j)].count].SendToBack();
+                        revealAroundNew(_GridPoint[new Point(i, j)].count);
                     }
                     else
                     {
-                        Grid[GridPoint[new Point(i, j)].count].revealed = true;
-                        GridNums[GridPoint[new Point(i, j)].count].Show();
-                        GridNums[GridPoint[new Point(i, j)].count].BringToFront();
-                        GridButtons[GridPoint[new Point(i, j)].count].SendToBack();
-                        Grid[GridPoint[new Point(i, j)].count].revealed = true;
+                        _Grid[_GridPoint[new Point(i, j)].count].revealed = true;
+                        _GridNums[_GridPoint[new Point(i, j)].count].Show();
+                        _GridNums[_GridPoint[new Point(i, j)].count].BringToFront();
+                        _GridButtons[_GridPoint[new Point(i, j)].count].SendToBack();
+                        _Grid[_GridPoint[new Point(i, j)].count].revealed = true;
                     }
                 }
                 catch (Exception)
@@ -415,38 +414,38 @@ namespace Minesweeper
         private void button2_Click(object sender, EventArgs e)
         {
             var random = new Random();
-            var Yes = ShowInputDialog(ref mineCountNum);
-            if (mineCountNum == -69)
+            var Yes = ShowInputDialog(ref _mineCountNum);
+            if (_mineCountNum == -69)
             {
                 MessageBox.Show("B) NICE! 😎\nYou did pretty good!!!");
-                mineCountNum = 69;
+                _mineCountNum = 69;
             }
-            else if (mineCountNum < 1 || mineCountNum > 99)
+            else if (_mineCountNum < 1 || _mineCountNum > 99)
             {
                 MessageBox.Show("Invalid number of mines, please try again.");
                 do
                 {
-                    var Yes2 = ShowInputDialog(ref mineCountNum);
-                } while (mineCountNum < 1 || mineCountNum > 99 && mineCountNum != -69);
+                    var Yes2 = ShowInputDialog(ref _mineCountNum);
+                } while (_mineCountNum < 1 || _mineCountNum > 99 && _mineCountNum != -69);
             }
             createBoard(random);
         }
         private void Hard_Click(object sender, EventArgs e)
         {
             var random = new Random();
-            mineCountNum = 99;
+            _mineCountNum = 99;
             createBoard(random);
         }
         private void Medium_Click(object sender, EventArgs e)
         {
             var random = new Random();
-            mineCountNum = 55;
+            _mineCountNum = 55;
             createBoard(random);
         }
         private void Easy_Click(object sender, EventArgs e)
         {
             var random = new Random();
-            mineCountNum = 22;
+            _mineCountNum = 22;
             createBoard(random);
         }
         private void timer1_Tick(object sender, EventArgs e)
