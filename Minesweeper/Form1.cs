@@ -172,6 +172,9 @@ namespace Minesweeper
                     case 3: picbox.Value.Image = global::Minesweeper.Properties.Resources._3; Grid[counter].changeType('n'); break;
                     case 4: picbox.Value.Image = global::Minesweeper.Properties.Resources._4; Grid[counter].changeType('n'); break;
                     case 5: picbox.Value.Image = global::Minesweeper.Properties.Resources._5; Grid[counter].changeType('n'); break;
+                    //case 6: picbox.Value.Image = global::Minesweeper.Properties.Resources._6; Grid[counter].changeType('n'); break;
+                    //case 7: picbox.Value.Image = global::Minesweeper.Properties.Resources._7; Grid[counter].changeType('n'); break;
+                    //case 8: picbox.Value.Image = global::Minesweeper.Properties.Resources._8; Grid[counter].changeType('n'); break;
                     case 0: if (Grid[counter].type != 'm') { picbox.Value.Image = null; Grid[counter].changeType('b'); } else { picbox.Value.Image = global::Minesweeper.Properties.Resources.mine; } break;
                     default: if (Grid[counter].type != 'm') { picbox.Value.Image = null; Grid[counter].changeType('b'); } else { picbox.Value.Image = global::Minesweeper.Properties.Resources.mine; } break;
                 }

@@ -96,6 +96,9 @@
     <None Include="Resources\1.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\6.png" />
+    <Content Include="Resources\7.png" />
+    <Content Include="Resources\8.png" />
     <Content Include="Resources\Image1.png" />
     <Content Include="Resources\mine.png" />
     <Content Include="Resources\Mineflag.png" />
