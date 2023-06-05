@@ -30,6 +30,7 @@ namespace Minesweeper
         {
             var random = new Random();
             var Yes = ShowInputDialog(ref mineCountNum);
+            InitializeComponent();
             createBoard(random);
         }
         private void clearEverything()
@@ -65,7 +66,6 @@ namespace Minesweeper
             else if (mineCountNum < 99 && mineCountNum > 40) { boardx = 16; boardy = 16; }
             else { boardx = 10; boardy = 10; }
 
-            InitializeComponent();
             int xx = 24, yy = 48, counter = 0;
             for (int i = 0; i < boardy; i++)
             {
