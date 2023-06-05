@@ -65,8 +65,10 @@ namespace Minesweeper
             int boardx = 16, boardy = 16;
             if (mineCountNum == 99) { boardx = 30; boardy = 16; }
             else if (mineCountNum < 99 && mineCountNum > 40) { boardx = 16; boardy = 16; }
-            else if (mineCountNum <= 40 && mineCountNum > 2) { boardx = 10; boardy = 10; }
-            else { boardx = 2; boardy = 2; }
+            else if (mineCountNum > 20 && mineCountNum <= 40) { boardx = mineCountNum / 2; boardy = mineCountNum / 2; }
+            else if (mineCountNum <= 20 && mineCountNum > 5) { boardx = 10; boardy = 10; }
+            else if (mineCountNum != 1) { boardx = 3; boardy = 3; }
+            else { boardx = 1; boardy = 1; }
 
             int xx = 24, yy = 48, counter = 0;
             for (int i = 0; i < boardy; i++)
@@ -244,7 +246,9 @@ namespace Minesweeper
                             GridNums[buttonNum].Show();
                             GridNums[buttonNum].BringToFront();
                         }
-                    Application.Restart();
+                    var random = new Random();
+                    MessageBox.Show("Restarting Game");
+                    createBoard(random);
                 }
                 else
                 {
@@ -290,12 +294,18 @@ namespace Minesweeper
                 if (correctHits.Count == mineCountNum && mineCountNum != 69)
                 {
                     MessageBox.Show("Good Job, you Won!!");
-                    Application.Restart();
+                    var random = new Random();
+                    MessageBox.Show("Restarting Game");
+                    mineCountNum = correctHits.Count;
+                    createBoard(random);
                 }
                 else if (correctHits.Count == mineCountNum && mineCountNum == 69)
                 {
                     MessageBox.Show("😎 Nice! B)");
-                    Application.Restart();
+                    mineCountNum = 69;
+                    MessageBox.Show("Restarting Game");
+                    var random = new Random();
+                    createBoard(random);
                 }
 
 
@@ -392,7 +402,11 @@ namespace Minesweeper
             inputBox.CancelButton = cancelButton;
 
             DialogResult result = inputBox.ShowDialog();
-            input = Int32.Parse(textBox.Text);
+            int number;
+            bool resulll = Int32.TryParse(textBox.Text, out number);
+            if (resulll) input = Int32.Parse(textBox.Text);
+            else result = 0;
+
             return result;
         }
         private void button2_Click(object sender, EventArgs e)
@@ -432,7 +446,6 @@ namespace Minesweeper
             mineCountNum = 22;
             createBoard(random);
         }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (_isCollapsed)
@@ -454,7 +467,6 @@ namespace Minesweeper
                 }
             }
         }
-
         private void button2_Click_1(object sender, EventArgs e)
         {
             timer1.Start();
