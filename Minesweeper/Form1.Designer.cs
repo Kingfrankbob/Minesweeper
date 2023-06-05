@@ -32,6 +32,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.mineNumberBox = new System.Windows.Forms.TextBox();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // mineCount
@@ -78,12 +79,24 @@
             this.mineNumberBox.Size = new System.Drawing.Size(100, 32);
             this.mineNumberBox.TabIndex = 3;
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(285, 20);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(129, 52);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "setMines";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ClientSize = new System.Drawing.Size(405, 421);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.mineNumberBox);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button1);
@@ -101,6 +114,7 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox mineNumberBox;
+        private System.Windows.Forms.Button button2;
     }
 }
 

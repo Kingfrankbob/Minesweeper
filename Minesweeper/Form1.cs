@@ -30,18 +30,40 @@ namespace Minesweeper
         {
             var random = new Random();
             var Yes = ShowInputDialog(ref mineCountNum);
-            
+            createBoard(random);
+        }
+        private void clearEverything()
+        {
+            Grid.Clear();
+            foreach(var item in GridButtons)
+            {
+                item.Value.Hide();
+                item.Value.Enabled = false;
+                this.Controls.Remove(item.Value);
+            }
+            foreach (var item in GridFlags)
+            {
+                item.Value.Hide();
+                item.Value.Enabled = false;
+                this.Controls.Remove(item.Value);  
+            }
+            foreach (var item in GridNums)
+            {
+                item.Value.Hide();
+                item.Value.Enabled = false;
+                this.Controls.Remove(item.Value);
+            }
+            GridButtons.Clear();GridFlags.Clear();GridNums.Clear(); pointToNum.Clear();buttonStates.Clear();GridPoint.Clear();correctHits.Clear();generalHits.Clear();MineList.Clear();mineNum = 0;mineNumCorrect = 0;
+
+        }
+        private void createBoard(Random random)
+        {
+            clearEverything();
             mineNum = mineCountNum;
             int boardx = 16, boardy = 16;
             if (mineCountNum == 99) { boardx = 30; boardy = 16; }
             else if (mineCountNum < 99 && mineCountNum > 40) { boardx = 16; boardy = 16; }
             else { boardx = 10; boardy = 10; }
-
-            MessageBox.Show(((boardy + 72) * 16).ToString() + " " + ((boardy + 72) * 16).ToString());
-
-            Size = new Size((boardy + 72) * 16, (boardy + 72) * 16);
-
-
 
             InitializeComponent();
             int xx = 24, yy = 48, counter = 0;
@@ -151,9 +173,21 @@ namespace Minesweeper
                 }
                 counter++;
             }
-
-
+            mineNumberBox.Text = mineCountNum.ToString();
+            Size = new Size((boardx * 16) + 72, (boardy * 16) + 112);
+            this.Size = Size;
         }
+        //private void Form1_Load(object sender, EventArgs e)
+        //{
+        //    mineNum = mineCountNum;
+        //    int boardx = 16, boardy = 16;
+        //    if (mineCountNum == 99) { boardx = 30; boardy = 16; }
+        //    else if (mineCountNum < 99 && mineCountNum > 40) { boardx = 16; boardy = 16; }
+        //    else { boardx = 10; boardy = 10; }
+        //    //MessageBox.Show(((boardx * 16) + 72).ToString() + " <- X Y ->  " + ((boardy * 16) + 72).ToString() + " " + boardx + " BoardX BoardY " + boardy);
+        //    Size = new Size((boardx * 16) + 72, (boardy * 16) + 112);
+        //    this.Size = Size;
+        //}
         private void BackButton_Paint(object sender, PaintEventArgs e)
         {
             var blnButtonDown = buttonStates[Int32.Parse(sender.ToString().Split(':')[1])];
@@ -196,7 +230,6 @@ namespace Minesweeper
                 handleImage(buttonNum);
             }
         }
-
         private void button_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -241,7 +274,6 @@ namespace Minesweeper
                 handleImage(buttonNum);
             }
         }
-
         private void handleImage(int buttonNum)
         {
             mineNumberBox.Text = (mineNum - generalHits.Count).ToString();
@@ -293,7 +325,6 @@ namespace Minesweeper
         
 
     }
-
         private void revealAroundNew(int num)
         {
             var xx = Grid[num].x;
@@ -331,7 +362,6 @@ namespace Minesweeper
                 }
 
         }
-
         private static DialogResult ShowInputDialog(ref int input)
         {
             System.Drawing.Size size = new System.Drawing.Size(200, 70);
@@ -370,7 +400,12 @@ namespace Minesweeper
             input = Int32.Parse(textBox.Text);
             return result;
         }
-
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var random = new Random();
+            var Yes = ShowInputDialog(ref mineCountNum);
+            createBoard(random);
+        }
     }
     public class tile
     {
