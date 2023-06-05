@@ -96,7 +96,7 @@
             this.panel1.Controls.Add(this.button2);
             this.panel1.Location = new System.Drawing.Point(192, 12);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(93, 32);
+            this.panel1.Size = new System.Drawing.Size(93, 173);
             this.panel1.TabIndex = 4;
             // 
             // Custom
@@ -106,7 +106,6 @@
             this.Custom.Size = new System.Drawing.Size(93, 36);
             this.Custom.TabIndex = 9;
             this.Custom.Text = "Custom";
-            this.Custom.Click += button2_Click;
             this.Custom.UseVisualStyleBackColor = true;
             // 
             // Hard
@@ -116,17 +115,16 @@
             this.Hard.Size = new System.Drawing.Size(93, 36);
             this.Hard.TabIndex = 8;
             this.Hard.Text = "Hard";
-            this.Hard.Click += Hard_Click;
             this.Hard.UseVisualStyleBackColor = true;
             // 
             // Medium
             // 
+            this.Medium.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.142858F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Medium.Location = new System.Drawing.Point(0, 65);
             this.Medium.Name = "Medium";
             this.Medium.Size = new System.Drawing.Size(93, 36);
             this.Medium.TabIndex = 7;
             this.Medium.Text = "Medium";
-            this.Medium.Click += Medium_Click;
             this.Medium.UseVisualStyleBackColor = true;
             // 
             // Easy
@@ -136,7 +134,6 @@
             this.Easy.Size = new System.Drawing.Size(93, 36);
             this.Easy.TabIndex = 6;
             this.Easy.Text = "Easy";
-            this.Easy.Click += Easy_Click;
             this.Easy.UseVisualStyleBackColor = true;
             // 
             // button2
