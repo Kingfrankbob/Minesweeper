@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>New Piskel.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -96,12 +99,14 @@
     <None Include="Resources\1.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="New Piskel.ico" />
     <Content Include="Resources\6.png" />
     <Content Include="Resources\7.png" />
     <Content Include="Resources\8.png" />
     <Content Include="Resources\Image1.png" />
     <Content Include="Resources\mine.png" />
     <Content Include="Resources\Mineflag.png" />
+    <Content Include="Resources\New Piskel.png" />
     <Content Include="Resources\Questionmark.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
