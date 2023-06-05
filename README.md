@@ -31,7 +31,7 @@ Simply because I wanted to make something like minesweeper for myself to enjoy
 
 - ~~Add a better recur. alg.~~ YESS! Im satisfied with the new one, old ones found in the \unused.txt
 - ~~Make sure all 'sprites' are in the proper places~~ All the checks passed...
-- ~~Add in the right click function to show 1. Blank ( ) 2. Mine (\*) 3. Question Mark (?)~~ (Added*!*)
+- ~~Add in the right click function to show 1. Blank ( ) 2. Mine (\*) 3. Question Mark (?)~~ (Added *!*)
 - For some reason when starting a new game the Mine text does no work, maybe need to look and see what all is cleared?
 
 ### License
