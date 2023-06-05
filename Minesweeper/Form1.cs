@@ -30,20 +30,7 @@ namespace Minesweeper
         public Form1()
         {
             var random = new Random();
-            var Yes = ShowInputDialog(ref mineCountNum);
-            if (mineCountNum == -69)
-            {
-                MessageBox.Show("B) NICE! 😎\nYou did pretty good!!!");
-                mineCountNum = 69;
-            }
-            else if (mineCountNum < 1 || mineCountNum > 99)
-            {
-                MessageBox.Show("Invalid number of mines, please try again.");
-                do
-                {
-                    var Yes2 = ShowInputDialog(ref mineCountNum);
-                } while (mineCountNum < 1 || mineCountNum > 99 && mineCountNum != -69);
-            }
+            mineCountNum = 30;
             InitializeComponent();
             createBoard(random);
         }
@@ -412,6 +399,19 @@ namespace Minesweeper
         {
             var random = new Random();
             var Yes = ShowInputDialog(ref mineCountNum);
+            if (mineCountNum == -69)
+            {
+                MessageBox.Show("B) NICE! 😎\nYou did pretty good!!!");
+                mineCountNum = 69;
+            }
+            else if (mineCountNum < 1 || mineCountNum > 99)
+            {
+                MessageBox.Show("Invalid number of mines, please try again.");
+                do
+                {
+                    var Yes2 = ShowInputDialog(ref mineCountNum);
+                } while (mineCountNum < 1 || mineCountNum > 99 && mineCountNum != -69);
+            }
             createBoard(random);
         }
         private void Hard_Click(object sender, EventArgs e)
