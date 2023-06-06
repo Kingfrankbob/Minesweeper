@@ -107,6 +107,7 @@
             this.Custom.Size = new System.Drawing.Size(93, 36);
             this.Custom.TabIndex = 9;
             this.Custom.Text = "Custom";
+            this.Custom.Click += button2_Click;
             this.Custom.UseVisualStyleBackColor = true;
             // 
             // Hard
@@ -116,6 +117,7 @@
             this.Hard.Size = new System.Drawing.Size(93, 36);
             this.Hard.TabIndex = 8;
             this.Hard.Text = "Hard";
+            this.Hard.Click += Hard_Click;
             this.Hard.UseVisualStyleBackColor = true;
             // 
             // Medium
@@ -126,6 +128,7 @@
             this.Medium.Size = new System.Drawing.Size(93, 36);
             this.Medium.TabIndex = 7;
             this.Medium.Text = "Medium";
+            this.Medium.Click += Medium_Click;
             this.Medium.UseVisualStyleBackColor = true;
             // 
             // Easy
@@ -135,6 +138,7 @@
             this.Easy.Size = new System.Drawing.Size(93, 36);
             this.Easy.TabIndex = 6;
             this.Easy.Text = "Easy";
+            this.Easy.Click += Easy_Click;
             this.Easy.UseVisualStyleBackColor = true;
             // 
             // button2
